@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class MovementScript : MonoBehaviour
+public class PlayerScript : MonoBehaviour
 {
     [SerializeField]
     private float speed = 0.1f;
@@ -13,6 +13,9 @@ public class MovementScript : MonoBehaviour
     private Rigidbody rb;
     private bool grounded = true;
     private bool jump = false;
+
+    private int score = 0;
+
     Vector3 vec = new Vector3();
 
     // Use start to get the needed components
@@ -38,6 +41,14 @@ public class MovementScript : MonoBehaviour
         Debug.DrawLine(transform.position + Vector3.down * 0.50f, transform.position + Vector3.down * 0.52f, Color.blue);
     }
 
+    // Pickup pickups
+    void OnTriggerEnter(Collider other) {
+        if (other.gameObject.CompareTag("pickup")) {
+            score++;
+            other.gameObject.SetActive(false);
+        }
+    }
+
     // Use this for physics-based calculations
     // I guess ground checking belongs here?
     void FixedUpdate() {
@@ -60,6 +71,13 @@ public class MovementScript : MonoBehaviour
         // Keep us slightly off ground to make sure the raycast be working
         if (grounded) {
             rb.AddForce(Vector3.up * 0.01f);
+        }
+    }
+
+    public int Score {
+        set {}
+        get {
+            return score;
         }
     }
 }
