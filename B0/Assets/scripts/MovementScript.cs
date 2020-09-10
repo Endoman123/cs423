@@ -53,7 +53,7 @@ public class MovementScript : MonoBehaviour
 
         // Figure out if we are touching the ground;
         // Only consider ourselves grounded if we are touching anything tagged as such.
-        grounded = Physics.Raycast(transform.position + Vector3.down * 0.48f, Vector3.down, 0.5f, 1 << 8);
+        grounded = Physics.Raycast(transform.position + Vector3.down * 0.45f, Vector3.down, 0.055f, 1 << 8);
         
         // Keep us slightly off ground to make sure the raycast be working
         if (grounded) {
