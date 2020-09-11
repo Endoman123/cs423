@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(PlayerInput))]
 public class PlayerScript : MonoBehaviour
 {
     [SerializeField]
@@ -18,10 +16,12 @@ public class PlayerScript : MonoBehaviour
     private Rigidbody rb;
     private bool grounded = true;
     private bool jump = false;
-    private Vector2 move = new Vector2();
     private Vector3 vec = new Vector3();
 
     private int score = 0;
+
+    // This is definitely not a gucci way to do multiple players
+    private int index = -1;
 
     // Use start to get the needed components
     private void Start()
@@ -30,20 +30,14 @@ public class PlayerScript : MonoBehaviour
         UpdateScore();
     }
 
-    private void OnRoll(InputValue v) {
-        move = v.Get<Vector2>();
-    }
-
-    private void OnJump() {
-        if (!jump)
-            jump = grounded;
-    }
-
     // Use this for all input
     private void Update() {
         // Rather than deallocate and reallocate,
         // just use the same vector
-        vec.Set(move.x, 0.0f, move.y);
+        vec.Set(Input.GetAxis($"P{index} Horizontal"), 0.0f, Input.GetAxis($"P{index} Vertical"));
+
+        if (!jump)
+            jump = grounded && Input.GetButtonDown($"P{index} Jump");
     }
 
     // Pickup pickups
@@ -82,5 +76,11 @@ public class PlayerScript : MonoBehaviour
 
     private void UpdateScore() {
         scoreText.text = "Score: " + score.ToString();
+    }
+
+    public int Index {
+        set {
+            index = value;
+        }
     }
 }
