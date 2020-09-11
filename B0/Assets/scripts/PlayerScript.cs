@@ -1,15 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerScript : MonoBehaviour
 {
     [SerializeField]
-    private float speed = 0.1f;
+    private float rollForce = 3f;
     [SerializeField]
-    private float jumpForce = 10f;
-
+    private float jumpForce = 5f;
+    [SerializeField]
+    private Text scoreText;
     private Rigidbody rb;
     private bool grounded = true;
     private bool jump = false;
@@ -19,13 +21,14 @@ public class PlayerScript : MonoBehaviour
     Vector3 vec = new Vector3();
 
     // Use start to get the needed components
-    void Start()
+    private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        UpdateScore();
     }
 
     // Use this for all input
-    void Update() {
+    private void Update() {
         // Rather than deallocate and reallocate,
         // just use the same vector
         vec = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical"));
@@ -42,18 +45,19 @@ public class PlayerScript : MonoBehaviour
     }
 
     // Pickup pickups
-    void OnTriggerEnter(Collider other) {
+    private void OnTriggerEnter(Collider other) {
         if (other.gameObject.CompareTag("pickup")) {
             score++;
             other.gameObject.SetActive(false);
+            UpdateScore();
         }
     }
 
     // Use this for physics-based calculations
     // I guess ground checking belongs here?
-    void FixedUpdate() {
+    private void FixedUpdate() {
         // Basic rolling movement
-        rb.AddForce(vec * speed);
+        rb.AddForce(vec * rollForce);
 
         // Jump force will be applied separately
         // This should also flip the grounded and jump bools to false immediately after
@@ -74,10 +78,7 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    public int Score {
-        set {}
-        get {
-            return score;
-        }
+    private void UpdateScore() {
+        scoreText.text = "Score: " + score.ToString();
     }
 }
