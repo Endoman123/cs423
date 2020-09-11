@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerScript : MonoBehaviour
 {
     [SerializeField]
@@ -12,13 +14,14 @@ public class PlayerScript : MonoBehaviour
     private float jumpForce = 5f;
     [SerializeField]
     private Text scoreText;
+    
     private Rigidbody rb;
     private bool grounded = true;
     private bool jump = false;
+    private Vector2 move = new Vector2();
+    private Vector3 vec = new Vector3();
 
     private int score = 0;
-
-    Vector3 vec = new Vector3();
 
     // Use start to get the needed components
     private void Start()
@@ -27,21 +30,20 @@ public class PlayerScript : MonoBehaviour
         UpdateScore();
     }
 
+    private void OnRoll(InputValue v) {
+        move = v.Get<Vector2>();
+    }
+
+    private void OnJump() {
+        if (!jump)
+            jump = grounded;
+    }
+
     // Use this for all input
     private void Update() {
         // Rather than deallocate and reallocate,
         // just use the same vector
-        vec = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical"));
-        
-        // Only handle the intent of jumping here 
-        if (!jump)
-            jump = grounded && Input.GetButtonDown("Jump");
-        
-        if (jump) 
-            Debug.Log("Jump");
-
-        // DEbug
-        Debug.DrawLine(transform.position + Vector3.down * 0.50f, transform.position + Vector3.down * 0.52f, Color.blue);
+        vec.Set(move.x, 0.0f, move.y);
     }
 
     // Pickup pickups
