@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerScript : MonoBehaviour
@@ -12,13 +13,18 @@ public class PlayerScript : MonoBehaviour
     private float jumpForce = 5f;
     [SerializeField]
     private Text scoreText;
+    [SerializeField]
+    private float penaltyTime = 3f;
+    
+    // Events that the GameController will handle
+    private UnityEvent eAddPoint = new UnityEvent(), eSubPoint = new UnityEvent();
     
     private Rigidbody rb;
     private bool grounded = true;
     private bool jump = false;
     private Vector3 vec = new Vector3();
 
-    private int score = 0;
+    private float penaltyTimer = -1f;
 
     // This is definitely not a gucci way to do multiple players
     private int index = -1;
@@ -27,25 +33,32 @@ public class PlayerScript : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        UpdateScore();
     }
 
-    // Use this for all input
-    private void Update() {
-        // Rather than deallocate and reallocate,
-        // just use the same vector
-        vec.Set(Input.GetAxis($"P{index} Horizontal"), 0.0f, Input.GetAxis($"P{index} Vertical"));
-
-        if (!jump)
-            jump = grounded && Input.GetButtonDown($"P{index} Jump");
+    // Subscribe actions to player's events
+    public void AddListeners(UnityAction add, UnityAction sub) {
+        eAddPoint.AddListener(add);
+        eSubPoint.AddListener(sub);
     }
 
     // Pickup pickups
     private void OnTriggerEnter(Collider other) {
-        if (other.gameObject.CompareTag("pickup")) {
-            score++;
+        if (other.gameObject.CompareTag("Pickup")) {
             other.gameObject.SetActive(false);
-            UpdateScore();
+            eAddPoint.Invoke();
+        }
+    }
+
+    // Give penalties
+    private void OnCollisionEnter(Collision other) {
+        // Penalize the player for touching someone
+        // but give them some invincibility time instead of wiping their score immediately
+        if (other.gameObject.CompareTag("Player") && 
+            other.transform.position.y < transform.position.y && 
+            penaltyTimer <= 0f) {
+            Debug.Log("Touching");
+            eSubPoint.Invoke();
+            penaltyTimer = penaltyTime;
         }
     }
 
@@ -69,13 +82,22 @@ public class PlayerScript : MonoBehaviour
         grounded = Physics.Raycast(transform.position + Vector3.down * 0.45f, Vector3.down, 0.055f, 1 << 8);
         
         // Keep us slightly off ground to make sure the raycast be working
-        if (grounded) {
+        if (grounded)
             rb.AddForce(Vector3.up * 0.01f);
-        }
     }
 
-    private void UpdateScore() {
-        scoreText.text = "Score: " + score.ToString();
+    // Use this for all input
+    // as well as updating the penalty timer
+    private void Update() {
+        // Rather than deallocate and reallocate,
+        // just use the same vector
+        vec.Set(Input.GetAxis($"P{index} Horizontal"), 0.0f, Input.GetAxis($"P{index} Vertical"));
+
+        if (!jump)
+            jump = grounded && Input.GetButtonDown($"P{index} Jump");
+
+        if (penaltyTimer > 0)
+            penaltyTimer = Mathf.Clamp(penaltyTimer - Time.deltaTime, 0f, penaltyTime);
     }
 
     public int Index {

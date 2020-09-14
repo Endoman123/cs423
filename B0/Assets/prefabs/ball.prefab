@@ -16,8 +16,8 @@ GameObject:
   - component: {fileID: 844900162513686397}
   - component: {fileID: 1124419552351165314}
   m_Layer: 2
-  m_Name: ball1
-  m_TagString: Untagged
+  m_Name: ball
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -125,6 +125,7 @@ MonoBehaviour:
   rollForce: 3
   jumpForce: 5
   scoreText: {fileID: 0}
+  penaltyTime: 3
 --- !u!114 &1124419552351165314
 MonoBehaviour:
   m_ObjectHideFlags: 0
