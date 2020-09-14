@@ -166,6 +166,14 @@ public class GameControllerScript : MonoBehaviour
             if (Input.GetButtonDown("Pause")) {
                 TogglePause();
             }
+
+            if (p1.transform.position.y <= -5) {
+                p1Script.ResetPlayer();
+                p1.transform.position = p1Spawn.transform.position;
+            } if (p2.transform.position.y <= -5) {
+                p2Script.ResetPlayer();
+                p2.transform.position = p2Spawn.transform.position;
+            }
         }
     }
 
