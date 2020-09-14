@@ -35,6 +35,15 @@ public class PlayerScript : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    // Reset player's velocity and rotation
+    public void ResetPlayer() {
+        if (rb != null) {
+            rb.velocity = Vector3.zero; 
+            rb.angularVelocity = Vector3.zero;
+            transform.rotation = Quaternion.identity; 
+        }
+    }
+
     // Subscribe actions to player's events
     public void AddListeners(UnityAction add, UnityAction sub) {
         eAddPoint.AddListener(add);
@@ -44,7 +53,7 @@ public class PlayerScript : MonoBehaviour
     // Pickup pickups
     private void OnTriggerEnter(Collider other) {
         if (other.gameObject.CompareTag("Pickup")) {
-            other.gameObject.SetActive(false);
+            other.gameObject.GetComponent<PickupControllerScript>().Pickup();
             eAddPoint.Invoke();
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class GameControllerScript : MonoBehaviour
@@ -12,6 +13,9 @@ public class GameControllerScript : MonoBehaviour
     private GameObject ballPrefab;
     [SerializeField]
     private Text statusText, timeText, p1ScoreText, p2ScoreText;
+
+    [SerializeField]
+    private GameObject pauseMenu;
     [SerializeField]
     private float camDist = 10f, smoothSpeed = 0.1f;
     [SerializeField]
@@ -24,12 +28,14 @@ public class GameControllerScript : MonoBehaviour
     private PlayerScript p1Script, p2Script;
     private bool gameStart = false;
     private float timer;
-    private Vector3 camTarget , camVelocity = Vector3.zero;
+    private Vector3 camStart, camTarget, camVelocity = Vector3.zero;
 
-    // Init map
+    // Init map and camera
     // This includes tracking who is who and all that jazz
     void Start()
     {
+        camStart = transform.position;
+
         p1 = Instantiate(ballPrefab, p1Spawn.transform.position, Quaternion.identity);
         p2 = Instantiate(ballPrefab, p2Spawn.transform.position, Quaternion.identity);
 
@@ -51,13 +57,17 @@ public class GameControllerScript : MonoBehaviour
     }
 
     // Restarts game
-    private void RestartGame() {
-        foreach (GameObject p in pickups) {
-            p.SetActive(true);
-        }
+    public void RestartGame() {
+        foreach (GameObject p in pickups)
+            p.GetComponent<PickupControllerScript>().ResetPickup();
+
+        transform.position = camStart;
 
         p1.transform.position = p1Spawn.transform.position;
         p2.transform.position = p2Spawn.transform.position;
+
+        p1Script.ResetPlayer();
+        p2Script.ResetPlayer();
 
         timer = 120f;
         p1Score = 0;
@@ -66,6 +76,17 @@ public class GameControllerScript : MonoBehaviour
         gameStart = false;
 
         ResetUI();
+        SetFreeze(true);
+
+        UpdateStatus("Press \"Space\" to start");
+    }
+
+    // Sets whether or not the game is frozen.
+    private void SetFreeze(bool freeze) {
+        p1Script.enabled = !freeze;
+        p2Script.enabled = !freeze;
+
+        Time.timeScale = freeze ? 0 : 1;
     }
 
     private void IncP1Score() {
@@ -89,10 +110,12 @@ public class GameControllerScript : MonoBehaviour
     }
 
     private void ResetUI() {
-        statusText.text = "";
+        UpdateStatus("");
         
         UpdateP1ScoreText();
         UpdateP2ScoreText();
+
+        pauseMenu.SetActive(false);
     }
 
     private void UpdateP1ScoreText() {
@@ -106,18 +129,50 @@ public class GameControllerScript : MonoBehaviour
     // Update time and move position
     private void Update()
     {
-        Vector3 
-            pos1 = p1.transform.position,
-            pos2 = p2.transform.position;
+        if (!gameStart) {
+            if (Input.GetKeyDown("space")) {
+                gameStart = true;
+                SetFreeze(false);
+                UpdateStatus("");
+            }
+        } else {
+            Vector3 
+                pos1 = p1.transform.position,
+                pos2 = p2.transform.position;
 
-        camTarget = (pos1 + pos2) / 2f - Mathf.Clamp(Mathf.Abs((pos2 - pos1).magnitude), 10f, 20f) * transform.forward;
-        
-        transform.position = Vector3.SmoothDamp(transform.position, camTarget, ref camVelocity, smoothSpeed);
+            camTarget = (pos1 + pos2) / 2f - Mathf.Clamp(Mathf.Abs((pos2 - pos1).magnitude), 10f, 20f) * transform.forward;
+            
+            transform.position = Vector3.SmoothDamp(transform.position, camTarget, ref camVelocity, smoothSpeed);
 
-        if (timer > 0) {
-            timer = Mathf.Clamp(timer - Time.deltaTime, 0, timer);
-            UpdateTimeDisplay();
+            if (timer > 0) {
+                timer = Mathf.Clamp(timer - Time.deltaTime, 0, timer);
+                UpdateTimeDisplay();
+            } else if (timer == 0) {
+                var winner = Mathf.Sign(p1Score - p2Score);
+
+                switch(winner) {
+                    case 1:
+                        UpdateStatus("Player 1 won!\n ");
+                        break;
+                    case -1:
+                        UpdateStatus("Player 2 won!");
+                        break;
+                    default:
+                        UpdateStatus("Uhh?");
+                        break;
+                }
+            }
+
+            if (Input.GetButtonDown("Pause")) {
+                TogglePause();
+            }
         }
+    }
+
+    // Toggle pause menu
+    public void TogglePause() {
+        pauseMenu.SetActive(!pauseMenu.activeInHierarchy);
+        SetFreeze(pauseMenu.activeInHierarchy);
     }
 
     // Format time and print it to the thing
