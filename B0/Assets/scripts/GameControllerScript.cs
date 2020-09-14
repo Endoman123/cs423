@@ -21,6 +21,7 @@ public class GameControllerScript : MonoBehaviour
 
     private GameObject p1, p2;
     private GameObject[] pickups;
+    private PlayerScript p1Script, p2Script;
     private bool gameStart = false;
     private float timer;
     private Vector3 camTarget , camVelocity = Vector3.zero;
@@ -32,14 +33,17 @@ public class GameControllerScript : MonoBehaviour
         p1 = Instantiate(ballPrefab, p1Spawn.transform.position, Quaternion.identity);
         p2 = Instantiate(ballPrefab, p2Spawn.transform.position, Quaternion.identity);
 
-        p1.GetComponent<PlayerScript>().Index = 1;
-        p2.GetComponent<PlayerScript>().Index = 2;
+        p1Script = p1.GetComponent<PlayerScript>();
+        p2Script = p2.GetComponent<PlayerScript>();
 
-        p1.GetComponent<PlayerScript>().AddListeners(IncP1Score, DecP1Score);
-        p2.GetComponent<PlayerScript>().AddListeners(IncP2Score, DecP2Score);
+        p1Script.Index = 1;
+        p2Script.Index = 2;
 
-        p1.GetComponent<Renderer>().material.SetColor("Albedo", p1Color);
-        p2.GetComponent<Renderer>().material.SetColor("Albedo", p2Color);
+        p1Script.AddListeners(IncP1Score, DecP1Score);
+        p2Script.AddListeners(IncP2Score, DecP2Score);
+
+        p1.GetComponent<Renderer>().material.color = p1Color;
+        p2.GetComponent<Renderer>().material.color = p2Color;
 
         pickups = GameObject.FindGameObjectsWithTag("Pickup");
         
