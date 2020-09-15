@@ -15300,7 +15300,7 @@ PrefabInstance:
     - target: {fileID: 1772379855093664784, guid: 4ac3c72a61b6bd4b6a6106c9c7d4ae47,
         type: 3}
       propertyPath: menu
-      value: "menu\x13"
+      value: scenes/menu
       objectReference: {fileID: 0}
     - target: {fileID: 1772379855093664784, guid: 4ac3c72a61b6bd4b6a6106c9c7d4ae47,
         type: 3}

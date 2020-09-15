@@ -18,4 +18,3 @@ the experience would be slow, laggy, and very susceptible to cheating. Even then
 their old API, UNet, for networking. This also means that implementing P2P gameplay for a game like this
 is now much harder since it would require looking for a good API to implement it.
 
-## Useful Links

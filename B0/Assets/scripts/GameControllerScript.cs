@@ -98,8 +98,10 @@ public class GameControllerScript : MonoBehaviour
     }
 
     private void DecP1Score() {
-        p1Score--;
-        UpdateP1ScoreText();
+        if (p1Score > 0) {
+            p1Score--;
+            UpdateP1ScoreText();
+        }
     }
 
     private void IncP2Score() {
@@ -108,8 +110,10 @@ public class GameControllerScript : MonoBehaviour
     }
 
     private void DecP2Score() {
-        p2Score--;
-        UpdateP2ScoreText();
+        if (p2Score > 0) {
+            p2Score--;
+            UpdateP2ScoreText();
+        }
     }
 
     private void ResetUI() {
