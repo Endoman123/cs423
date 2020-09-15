@@ -4,20 +4,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameControllerScript : MonoBehaviour
 {
+    [SerializeField]
+    private string menu;
     [SerializeField]
     private GameObject p1Spawn, p2Spawn;
     [SerializeField]
     private GameObject ballPrefab;
     [SerializeField]
-    private Text statusText, timeText, p1ScoreText, p2ScoreText;
+    private Text statusText, timeText, p1ScoreText, p2ScoreText, victoryHeader;
 
     [SerializeField]
-    private GameObject pauseMenu;
+    private GameObject pauseMenu, victoryMenu;
     [SerializeField]
-    private float camDist = 10f, smoothSpeed = 0.1f;
+    private float minCamDist = 5f, maxCamDist = 30f, distRatio = 1f, smoothSpeed = 0.1f;
     [SerializeField]
     private Color p1Color, p2Color;
 
@@ -116,6 +119,7 @@ public class GameControllerScript : MonoBehaviour
         UpdateP2ScoreText();
 
         pauseMenu.SetActive(false);
+        victoryMenu.SetActive(false);
     }
 
     private void UpdateP1ScoreText() {
@@ -140,39 +144,41 @@ public class GameControllerScript : MonoBehaviour
                 pos1 = p1.transform.position,
                 pos2 = p2.transform.position;
 
-            camTarget = (pos1 + pos2) / 2f - Mathf.Clamp(Mathf.Abs((pos2 - pos1).magnitude), 10f, 20f) * transform.forward;
+            camTarget = (pos1 + pos2) / 2f - Mathf.Clamp(Mathf.Abs((pos2 - pos1).magnitude) * distRatio, minCamDist, maxCamDist) * transform.forward;
             
             transform.position = Vector3.SmoothDamp(transform.position, camTarget, ref camVelocity, smoothSpeed);
 
             if (timer > 0) {
                 timer = Mathf.Clamp(timer - Time.deltaTime, 0, timer);
                 UpdateTimeDisplay();
+
+                if (Input.GetButtonDown("Pause"))
+                    TogglePause();
+
+                if (p1.transform.position.y <= -5) {
+                    p1Script.ResetPlayer();
+                    p1.transform.position = p1Spawn.transform.position;
+                } if (p2.transform.position.y <= -5) {
+                    p2Script.ResetPlayer();
+                    p2.transform.position = p2Spawn.transform.position;
+                }
             } else if (timer == 0) {
+                SetFreeze(true);
                 var winner = Mathf.Sign(p1Score - p2Score);
 
                 switch(winner) {
                     case 1:
-                        UpdateStatus("Player 1 won!\n ");
+                        victoryHeader.text = "Player 1 wins!";
                         break;
                     case -1:
-                        UpdateStatus("Player 2 won!");
+                        victoryHeader.text = "Player 2 wins!";
                         break;
                     default:
-                        UpdateStatus("Uhh?");
+                        victoryHeader.text = "A tie?!";
                         break;
                 }
-            }
-
-            if (Input.GetButtonDown("Pause")) {
-                TogglePause();
-            }
-
-            if (p1.transform.position.y <= -5) {
-                p1Script.ResetPlayer();
-                p1.transform.position = p1Spawn.transform.position;
-            } if (p2.transform.position.y <= -5) {
-                p2Script.ResetPlayer();
-                p2.transform.position = p2Spawn.transform.position;
+                
+                victoryMenu.SetActive(true);
             }
         }
     }
@@ -194,5 +200,11 @@ public class GameControllerScript : MonoBehaviour
     // Set the status text
     private void UpdateStatus(String status) {
         statusText.text = status;
+    }
+
+    // Quit to menu
+    public void Quit() {
+        SceneManager.LoadScene(menu, LoadSceneMode.Single);
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName(menu));
     }
 }
