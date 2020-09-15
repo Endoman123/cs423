@@ -81,7 +81,7 @@ public class GameControllerScript : MonoBehaviour
         ResetUI();
         SetFreeze(true);
 
-        UpdateStatus("Press \"Space\" to start");
+        UpdateStatus("Press \"P\" to start");
     }
 
     // Sets whether or not the game is frozen.
@@ -132,9 +132,9 @@ public class GameControllerScript : MonoBehaviour
 
     // Update time and move position
     private void Update()
-    {
+    {        
         if (!gameStart) {
-            if (Input.GetKeyDown("space")) {
+            if (Input.GetKeyDown("p")) {
                 gameStart = true;
                 SetFreeze(false);
                 UpdateStatus("");
@@ -205,6 +205,5 @@ public class GameControllerScript : MonoBehaviour
     // Quit to menu
     public void Quit() {
         SceneManager.LoadScene(menu, LoadSceneMode.Single);
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName(menu));
     }
 }

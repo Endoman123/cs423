@@ -11,6 +11,5 @@ public class MenuControllerScript : MonoBehaviour
     // Function to load scenes
     public void LoadScene() {
         SceneManager.LoadScene(map, LoadSceneMode.Single);
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName(map));
     } 
 }
